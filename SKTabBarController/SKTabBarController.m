@@ -19,14 +19,11 @@
 
 - (void)viewDidLoad {
 	[super viewDidLoad];
-	
-	self.view.backgroundColor = [UIColor whiteColor];
-	
+		
 	tabBar = [[UITabBar alloc] init];
 	tabBar.delegate = self;
 	[tabBar sizeToFit];
 	[self.view addSubview:tabBar];
-	
 
 	tabBar.frame = CGRectMake(0,
 						 self.view.frame.size.height - self.tabBar.frame.size.height,
@@ -34,16 +31,24 @@
 						 self.tabBar.frame.size.height);
 	
 	tabBar.autoresizingMask = UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleWidth;
-		
+	
 	self.viewControllers = viewControllers;
 }
 
 - (void) setViewControllers:(NSArray *)newViewControllers {
+	for (UIViewController *viewController in viewControllers) {
+		[viewController willMoveToParentViewController:nil];
+		[viewController removeFromParentViewController];
+		[viewController didMoveToParentViewController:nil];
+	}
 	viewControllers = newViewControllers;
 	NSMutableArray *tabBarItems = [NSMutableArray arrayWithCapacity:viewControllers.count];
-	for (NSInteger index = 0; index < viewControllers.count; index++) {
-		UIViewController *viewController = viewControllers[index];
+	for (UIViewController *viewController in viewControllers) {
 		[tabBarItems addObject:viewController.tabBarItem];
+		
+		[viewController willMoveToParentViewController:self];
+		[self addChildViewController:viewController];
+		[viewController didMoveToParentViewController:self];
 	}
 	self.tabBar.items = tabBarItems;
 	
@@ -54,6 +59,8 @@
 - (void) tabBar:(UITabBar *)aTabBar didSelectItem:(UITabBarItem *)item {
 	NSInteger index = [tabBar.items indexOfObject:item];
 	UIViewController *vc = viewControllers[index];
+	
+	//default behavior is to pop to root if you're tapping the button that's already selected
 	if (vc != nil && self.selectedViewController == vc) {
 		if ([vc isKindOfClass:[UINavigationController class]]) {
 			[((UINavigationController*)vc) popToRootViewControllerAnimated:YES];
@@ -61,29 +68,15 @@
 		return;
 	}
 	
-	[selectedViewController willMoveToParentViewController:nil];
 	//this automatically calls view did/will disappear
 	[selectedViewController.view removeFromSuperview];
-	
-	//use this as the counterpart to addChildViewController:
-	[selectedViewController removeFromParentViewController];
 	
 	vc = viewControllers[index];
 	
 	vc.view.frame = CGRectMake(0, 0, self.view.bounds.size.width, self.view.bounds.size.height - self.tabBar.bounds.size.height);
 	
-	
-	// willMoveToParentViewController: is not strictly necessary, unless you're overriding addChildViewController:
-	[vc willMoveToParentViewController:self];
-	
-	//must be called before addSubview:
-	[self addChildViewController:vc];
-	
 	//this automatically calls view did/will appear
 	[self.view addSubview:vc.view];
-	
-	//this is necessary, unlike willMove
-	[vc didMoveToParentViewController:self];
 	
 	selectedViewController = vc;
 }
