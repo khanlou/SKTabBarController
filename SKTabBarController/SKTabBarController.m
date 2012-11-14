@@ -45,8 +45,9 @@
 	NSMutableArray *tabBarItems = [NSMutableArray arrayWithCapacity:viewControllers.count];
 	for (UIViewController *viewController in viewControllers) {
 		[tabBarItems addObject:viewController.tabBarItem];
-		
-		[viewController willMoveToParentViewController:self];
+
+		//çalling willMoveToParentViewController: is unnecessary here, as addChildViewController: will call it for you, and you will get double callbacks
+//		[viewController willMoveToParentViewController:self];
 		[self addChildViewController:viewController];
 		[viewController didMoveToParentViewController:self];
 	}
@@ -80,7 +81,6 @@
 	
 	selectedViewController = vc;
 }
-
 
 - (void) willRotateToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation duration:(NSTimeInterval)duration {
 	NSLog(@"parent will rotate");
