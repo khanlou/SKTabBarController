@@ -39,15 +39,19 @@
 	for (UIViewController *viewController in viewControllers) {
 		[viewController willMoveToParentViewController:nil];
 		[viewController removeFromParentViewController];
-		[viewController didMoveToParentViewController:nil];
+		
+		//calling didMoveToParentViewController:nil: is unnecessary here, as removeFromParentViewController: will call it for you, and you will get double callbacks
+//		[viewController didMoveToParentViewController:nil];
+		
 	}
 	viewControllers = newViewControllers;
 	NSMutableArray *tabBarItems = [NSMutableArray arrayWithCapacity:viewControllers.count];
 	for (UIViewController *viewController in viewControllers) {
 		[tabBarItems addObject:viewController.tabBarItem];
 
-		//çalling willMoveToParentViewController: is unnecessary here, as addChildViewController: will call it for you, and you will get double callbacks
+		//calling willMoveToParentViewController: is unnecessary here, as addChildViewController: will call it for you, and you will get double callbacks
 //		[viewController willMoveToParentViewController:self];
+		
 		[self addChildViewController:viewController];
 		[viewController didMoveToParentViewController:self];
 	}
