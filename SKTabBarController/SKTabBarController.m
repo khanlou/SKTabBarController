@@ -14,7 +14,7 @@
 
 @implementation SKTabBarController
 
-@synthesize selectedIndex, selectedViewController, tabBar, viewControllers;
+@synthesize selectedIndex, selectedViewController, tabBar;
 
 
 - (void)viewDidLoad {
@@ -32,21 +32,20 @@
 	
 	tabBar.autoresizingMask = UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleWidth;
 	
-	self.viewControllers = viewControllers;
+	self.viewControllers = self.viewControllers;
 }
 
 - (void) setViewControllers:(NSArray *)newViewControllers {
-	for (UIViewController *viewController in viewControllers) {
+	for (UIViewController *viewController in self.childViewControllers) {
 		[viewController willMoveToParentViewController:nil];
 		[viewController removeFromParentViewController];
 		
 		//calling didMoveToParentViewController:nil: is unnecessary here, as removeFromParentViewController: will call it for you, and you will get double callbacks
 //		[viewController didMoveToParentViewController:nil];
-		
 	}
-	viewControllers = newViewControllers;
-	NSMutableArray *tabBarItems = [NSMutableArray arrayWithCapacity:viewControllers.count];
-	for (UIViewController *viewController in viewControllers) {
+
+	NSMutableArray *tabBarItems = [NSMutableArray arrayWithCapacity:newViewControllers.count];
+	for (UIViewController *viewController in newViewControllers) {
 		[tabBarItems addObject:viewController.tabBarItem];
 
 		//calling willMoveToParentViewController: is unnecessary here, as addChildViewController: will call it for you, and you will get double callbacks
@@ -61,12 +60,16 @@
 	[tabBar.delegate tabBar:tabBar didSelectItem:tabBarItems[0]];
 }
 
+- (NSArray*) viewControllers {
+	return self.childViewControllers;
+}
+
 - (void) tabBar:(UITabBar *)aTabBar didSelectItem:(UITabBarItem *)item {
 	NSInteger index = [tabBar.items indexOfObject:item];
-	UIViewController *vc = viewControllers[index];
+	UIViewController *vc = self.childViewControllers[index];
 	
 	//default behavior is to pop to root if you're tapping the button that's already selected
-	if (vc != nil && self.selectedViewController == vc) {
+	if (self.selectedViewController == vc) {
 		if ([vc isKindOfClass:[UINavigationController class]]) {
 			[((UINavigationController*)vc) popToRootViewControllerAnimated:YES];
 		}
@@ -76,7 +79,6 @@
 	//this automatically calls view did/will disappear
 	[selectedViewController.view removeFromSuperview];
 	
-	vc = viewControllers[index];
 	
 	vc.view.frame = CGRectMake(0, 0, self.view.bounds.size.width, self.view.bounds.size.height - self.tabBar.bounds.size.height);
 	
