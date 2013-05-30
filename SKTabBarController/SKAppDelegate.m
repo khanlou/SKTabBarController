@@ -19,7 +19,7 @@
 {
 	self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
 	// Override point for customization after application launch.
-	self.tabBarController = [[SKTabBarController alloc] initWithNibName:@"SKTabBarController" bundle:nil];
+	self.tabBarController = [[SKTabBarController alloc] init];
 	
 	SKViewController *firstViewController = [[SKViewController alloc] init];
 	firstViewController.view.backgroundColor = [UIColor blueColor];
